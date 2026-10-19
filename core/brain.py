@@ -15,13 +15,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("technocracysi")
 
 # ============================================================
-# API GROQ
+# API GROQ — CONFIGURAÇÃO
 # ============================================================
+# CONFIGURE A CHAVE EM:
+# 1. Streamlit Cloud: Settings > Secrets
+# 2. Localmente: variável de ambiente GROQ_API_KEY
+# 3. Opcionalmente: arquivo .env local
+#
+# Nunca publique sua chave no GitHub.
 
-GROQ_API_KEY = os.getenv(
-    "GROQ_API_KEY",
-    "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",
-).strip()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 
 GROQ_BASE_URL = os.getenv(
     "GROQ_BASE_URL",
@@ -33,15 +36,13 @@ GROQ_MODEL = os.getenv(
     "openai/gpt-oss-120b",
 ).strip()
 
-PLACEHOLDER = "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"
-
 # ============================================================
 # CLIENTE
 # ============================================================
 
 client = None
 
-if GROQ_API_KEY and GROQ_API_KEY != PLACEHOLDER:
+if GROQ_API_KEY:
     try:
         client = OpenAI(
             api_key=GROQ_API_KEY,
@@ -53,7 +54,10 @@ if GROQ_API_KEY and GROQ_API_KEY != PLACEHOLDER:
     except Exception:
         logger.exception("Falha ao inicializar cliente Groq.")
 else:
-    logger.error("GROQ_API_KEY ausente ou não configurada.")
+    logger.error(
+        "GROQ_API_KEY ausente. Configure a chave nos Secrets "
+        "do Streamlit ou na variável de ambiente."
+    )
 
 # ============================================================
 # IDENTIDADE DO SISTEMA
@@ -112,8 +116,8 @@ def ask(prompt: str) -> str:
             "Cliente indisponível. Verifique GROQ_API_KEY."
         )
         return (
-            "CONFIGURAÇÃO AUSENTE: configure uma chave válida "
-            "da Groq no código ou nos Secrets do Streamlit."
+            "CONFIGURAÇÃO AUSENTE: configure GROQ_API_KEY "
+            "nos Secrets do Streamlit ou no ambiente local."
         )
 
     try:
@@ -129,8 +133,7 @@ def ask(prompt: str) -> str:
                     "content": prompt.strip(),
                 },
             ],
-            max_completion_tokens=2048,
-            reasoning_effort="medium",
+            max_tokens=2048,
         )
 
         if not response.choices:
@@ -163,7 +166,8 @@ def ask(prompt: str) -> str:
         )
 
         status_text = (
-            f"HTTP {status}" if status is not None
+            f"HTTP {status}"
+            if status is not None
             else "sem código HTTP"
         )
 
