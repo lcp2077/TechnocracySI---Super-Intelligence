@@ -182,13 +182,18 @@ def ask(prompt: str) -> str:
         return str(content)
 
 
-    except Exception as e:
+        except Exception:
+        import logging
+
+        logging.exception(
+            "Erro real ao consultar a API da TechnocracySI"
+        )
 
         return (
             "TECHNOCRACYSI encontrou um problema "
             "ao processar a solicitação."
         )
-
+    
 
 # ============================================================
 # TESTE LOCAL
