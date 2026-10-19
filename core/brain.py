@@ -20,7 +20,7 @@ logger = logging.getLogger("technocracysi")
 
 GROQ_API_KEY = os.getenv(
     "GROQ_API_KEY",
-    "COLE_SUA_NOVA_CHAVE_GROQ_AQUI",
+    "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",
 ).strip()
 
 GROQ_BASE_URL = os.getenv(
@@ -33,7 +33,7 @@ GROQ_MODEL = os.getenv(
     "openai/gpt-oss-120b",
 ).strip()
 
-PLACEHOLDER = "COLE_SUA_NOVA_CHAVE_GROQ_AQUI"
+PLACEHOLDER = "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"
 
 # ============================================================
 # CLIENTE
