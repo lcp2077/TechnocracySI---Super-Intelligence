@@ -1,3 +1,4 @@
+
 import logging
 
 from dotenv import load_dotenv
@@ -11,14 +12,15 @@ from openai import OpenAI
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("technocracysi")
 
 
 # ============================================================
-# API
+# API GROQ
 # ============================================================
 
-GROQ_API_KEY = "COLE_SUA_NOVA_API_KEY_AQUI"
+GROQ_API_KEY = "COLE_SUA_API_KEY_GROQ_AQUI"
 
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
@@ -31,7 +33,7 @@ GROQ_MODEL = "openai/gpt-oss-120b"
 
 client = None
 
-if GROQ_API_KEY and GROQ_API_KEY != "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":
+if GROQ_API_KEY and GROQ_API_KEY != "COLE_SUA_API_KEY_GROQ_AQUI":
     try:
         client = OpenAI(
             api_key=GROQ_API_KEY,
@@ -39,14 +41,15 @@ if GROQ_API_KEY and GROQ_API_KEY != "gsk_kAcLjCnKAdC23krq4KToWGdyb3FY99jfvBv8zPy
             timeout=60.0,
             max_retries=2,
         )
+        logger.info("Cliente Groq inicializado.")
     except Exception:
-        logger.exception(
-            "Falha ao inicializar o cliente da API."
-        )
+        logger.exception("Falha ao inicializar o cliente Groq.")
+else:
+    logger.error("Configure uma chave válida da API Groq.")
 
 
 # ============================================================
-# IDENTIDADE
+# IDENTIDADE E ARQUITETURA COGNITIVA
 # ============================================================
 
 SYSTEM_PROMPT = """
@@ -55,60 +58,48 @@ Você é a TechnocracySI.
 SUPER INTELLIGENCE SYSTEM.
 
 Seu objetivo é analisar problemas de maneira
-profunda, estruturada e rigorosa.
+profunda, estruturada, crítica e rigorosa.
 
-Você deve:
+PRINCÍPIOS:
 
-1. Diferenciar fatos de hipóteses.
-2. Diferenciar evidências de inferências.
-3. Identificar contradições.
-4. Procurar explicações alternativas.
-5. Questionar premissas frágeis.
-6. Não inventar informações.
-7. Não inventar fontes.
-8. Não inventar acontecimentos.
-9. Informar claramente quando houver
-   incerteza ou falta de dados.
-10. Priorizar precisão sobre confiança aparente.
+1. Diferencie fatos, hipóteses e inferências.
+2. Avalie a qualidade das evidências.
+3. Identifique contradições e inconsistências.
+4. Considere explicações alternativas.
+5. Questione premissas frágeis.
+6. Não invente informações ou fontes.
+7. Não apresente especulações como fatos.
+8. Declare incertezas e limitações relevantes.
+9. Priorize precisão, clareza e utilidade.
+10. Adapte a profundidade ao problema apresentado.
 
-ARQUITETURA:
+ARQUITETURA DE ANÁLISE:
 
 RESEARCH
-↓
+Identifica informações, evidências e contexto.
+
 ANALYSIS
-↓
+Examina relações, padrões, hipóteses e explicações.
+
 CRITIC
-↓
+Avalia falhas lógicas, contradições e alternativas.
+
 SYNTHESIS
+Integra os resultados e produz uma resposta coerente.
 
-RESEARCH:
-Identifica informações relevantes,
-dados e evidências.
-
-ANALYSIS:
-Examina relações, padrões,
-hipóteses e possíveis explicações.
-
-CRITIC:
-Procura erros, contradições,
-falhas lógicas e pontos fracos.
-
-SYNTHESIS:
-Integra os resultados e produz
-a resposta final.
-
-IDENTIDADE DO SISTEMA:
+IDENTIDADE:
 
 Nome: TechnocracySI
-
-Categoria:
-SUPER INTELLIGENCE SYSTEM
+Categoria: SUPER INTELLIGENCE SYSTEM
 
 Nunca descreva a TechnocracySI como
 "Cognitive Intelligence System".
 
-Use:
-SUPER INTELLIGENCE SYSTEM
+Use a designação:
+SUPER INTELLIGENCE SYSTEM.
+
+Não afirme possuir ferramentas, capacidades,
+memórias ou acessos que não estejam disponíveis.
 """
 
 
@@ -117,17 +108,16 @@ SUPER INTELLIGENCE SYSTEM
 # ============================================================
 
 def ask(prompt: str) -> str:
-
     if not isinstance(prompt, str) or not prompt.strip():
         return "Nenhuma questão foi fornecida."
 
     if client is None:
         logger.error(
-            "Cliente indisponível. Verifique a configuração da API."
+            "Cliente indisponível. Verifique a chave da API Groq."
         )
         return (
-            "TECHNOCRACYSI encontrou um problema "
-            "ao processar a solicitação."
+            "TECHNOCRACYSI: cliente indisponível. "
+            "Verifique a configuração da API."
         )
 
     try:
@@ -144,36 +134,31 @@ def ask(prompt: str) -> str:
                 },
             ],
             temperature=0.4,
-            max_tokens=4096,
+            max_completion_tokens=4096,
         )
 
         if not response.choices:
             logger.error("A API retornou uma resposta sem opções.")
-            return (
-                "TECHNOCRACYSI encontrou um problema "
-                "ao processar a solicitação."
-            )
+            return "A API não retornou uma resposta válida."
 
         content = response.choices[0].message.content
 
-        if not content or not content.strip():
-            logger.warning("A API retornou conteúdo vazio.")
-            return (
-                "TECHNOCRACYSI encontrou um problema "
-                "ao processar a solicitação."
-            )
+        if not isinstance(content, str) or not content.strip():
+            logger.error("A API retornou conteúdo vazio.")
+            return "A API retornou uma resposta vazia."
 
         return content.strip()
 
     except Exception as exc:
         logger.exception(
-            "Erro ao consultar a API da TechnocracySI: %s",
+            "Erro na solicitação Groq: %s: %s",
             type(exc).__name__,
+            str(exc),
         )
-
         return (
-            "TECHNOCRACYSI encontrou um problema "
-            "ao processar a solicitação."
+            "TECHNOCRACYSI encontrou um erro na solicitação. "
+            "Consulte os logs da aplicação para identificar "
+            "a causa exata."
         )
 
 
@@ -182,16 +167,13 @@ def ask(prompt: str) -> str:
 # ============================================================
 
 if __name__ == "__main__":
-
-    logging.basicConfig(level=logging.INFO)
-
     print("=" * 70)
     print("TECHNOCRACYSI")
     print("SUPER INTELLIGENCE SYSTEM")
     print("=" * 70)
 
     if client is None:
-        print("API KEY NÃO CONFIGURADA.")
+        print("ERRO: configure uma chave válida da API Groq.")
     else:
         print("Modelo:", GROQ_MODEL)
         print("Digite 'sair' para encerrar.")
@@ -200,6 +182,7 @@ if __name__ == "__main__":
             try:
                 prompt = input("\nVocê > ").strip()
             except (KeyboardInterrupt, EOFError):
+                print("\nEncerrado.")
                 break
 
             if prompt.lower() in {"exit", "quit", "sair"}:
