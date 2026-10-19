@@ -20,7 +20,7 @@ logger = logging.getLogger("technocracysi")
 # API GROQ
 # ============================================================
 
-GROQ_API_KEY = "COLE_SUA_API_KEY_GROQ_AQUI"
+GROQ_API_KEY = "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"
 
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
